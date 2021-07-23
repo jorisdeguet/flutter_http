@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:http/transfer.dart';
 
 void main() {
   runApp(MyApp());
@@ -50,11 +51,53 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int reponse = -1;
 
+  Truc truc = Truc();
+
+  List<Truc> trucs = [];
+
   void getHttp() async {
     try {
       var response = await Dio().get('https://exercices-web.herokuapp.com/exos/long/double/99');
       print(response);
       this.reponse =  response.data;
+      setState(() {});
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Erreur reseau')
+          )
+      );
+    }
+  }
+
+  void getHttpComplex(String nom) async {
+    try {
+      var response = await Dio().get('https://exercices-web.herokuapp.com/exos/truc/complexe?name='+nom);
+      print(response);
+      this.truc =  Truc.fromJson(response.data);
+      setState(() {});
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Erreur reseau')
+          )
+      );
+    }
+  }
+
+  void getHttpListComplex() async {
+    try {
+      var response = await Dio().get('https://exercices-web.herokuapp.com/exos/truc/list');
+      print(response);
+      var listeJSON = response.data as List;
+      var listeTruc = listeJSON.map(
+          (elementJSON) {
+            return Truc.fromJson(elementJSON);
+          }
+      ).toList();
+      this.trucs =  listeTruc;
       setState(() {});
     } catch (e) {
       print(e);
@@ -83,14 +126,20 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'le nombre est ' + this.reponse.toString(),
+              'le nombre est ' + this.truc.b,
             ),
 
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: getHttp,
+        onPressed: () {
+            int a = 0;
+            int b = a + a;
+            getHttp();
+            getHttpComplex('joris');
+            getHttpListComplex();
+          },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
