@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:http/lib_http.dart';
 import 'package:http/transfer.dart';
 
 void main() {
@@ -49,33 +50,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  int reponse = -1;
-
   Truc truc = Truc();
 
   List<Truc> trucs = [];
 
-  void getHttp() async {
-    try {
-      var response = await Dio().get('https://exercices-web.herokuapp.com/exos/long/double/99');
-      print(response);
-      this.reponse =  response.data;
-      setState(() {});
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Erreur reseau')
-          )
-      );
-    }
-  }
-
   void getHttpComplex(String nom) async {
-    try {
-      var response = await Dio().get('https://exercices-web.herokuapp.com/exos/truc/complexe?name='+nom);
-      print(response);
-      this.truc =  Truc.fromJson(response.data);
+    try{
+      this.truc =  await httpComplex(nom);
       setState(() {});
     } catch (e) {
       print(e);
@@ -89,18 +70,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getHttpListComplex() async {
     try {
-      var response = await Dio().get('https://exercices-web.herokuapp.com/exos/truc/list');
-      print(response);
-      var listeJSON = response.data as List;
-      var listeTruc = listeJSON.map(
-          (elementJSON) {
-            return Truc.fromJson(elementJSON);
-          }
-      ).toList();
-      this.trucs =  listeTruc;
+      this.trucs = await httpListComplex();
       setState(() {});
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('Erreur reseau')
@@ -133,12 +105,24 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-            int a = 0;
-            int b = a + a;
-            getHttp();
-            getHttpComplex('joris');
-            getHttpListComplex();
+        onPressed: () async {
+            // getHttpComplex('joris');
+            // getHttpListComplex();
+            try {
+              SignupRequest req = SignupRequest();
+              req.username = 'jorisdeguet';
+              req.password = 'password';
+              var reponse = await signup(req);
+              print(reponse);
+            } on DioError catch(e) {
+              print(e);
+              String message = e.response!.data;
+              if (message == "BadCredentialsException") {
+                print('login deja utilise');
+              } else {
+                print('autre erreurs');
+              }
+            }
           },
         tooltip: 'Increment',
         child: Icon(Icons.add),
