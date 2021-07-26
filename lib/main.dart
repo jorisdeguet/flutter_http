@@ -109,10 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // getHttpComplex('joris');
             // getHttpListComplex();
             try {
-              SignupRequest req = SignupRequest();
-              req.username = 'jorisdeguet';
-              req.password = 'password';
-              var reponse = await signup(req);
+              var reponse = await cookieDemo();
               print(reponse);
             } on DioError catch(e) {
               print(e);
